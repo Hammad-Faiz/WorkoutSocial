@@ -1,22 +1,35 @@
 import SwiftUI
 
 struct MainTabView: View {
-    var body: some View {
-        TabView {
-            FeedView()
-                .tabItem {
-                    Label("Feed", systemImage: "house")
-                }
+  @AppStorage("isLoggedIn") private var isLoggedIn: Bool = true
+  @AppStorage("username") private var username: String = ""
 
-            PostView()
-                .tabItem {
-                    Label("Post", systemImage: "plus.circle")
-                }
+  @StateObject var postStore = PostStore()
 
-            Text("Profile Coming Soon")
-                .tabItem {
-                    Label("Profile", systemImage: "person.crop.circle")
-                }
+  var body: some View {
+    TabView {
+      FeedView()
+        .environmentObject(postStore)
+        .tabItem {
+          Label("Feed", systemImage: "house")
         }
+
+      PostView()
+        .environmentObject(postStore)
+        .tabItem {
+          Label("Post", systemImage: "plus.circle")
+        }
+
+      ProfileView()
+        .tabItem {
+          Label("Profile", systemImage: "person.crop.circle")
+        }
+      Button("Log Out") {
+        isLoggedIn = false
+        username = ""
+      }
+      .padding()
+      .foregroundColor(.red)
     }
+  }
 }

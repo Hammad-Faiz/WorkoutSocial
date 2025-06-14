@@ -1,40 +1,71 @@
-import SwiftUI
 import PhotosUI
+import SwiftUI
 
 struct PostView: View {
-    @State private var selectedImage: UIImage?
-    @State private var isPosted = false
-    @State private var caption: String = ""
 
-    var body: some View {
-        VStack(spacing: 20) {
-            if let image = selectedImage {
-                Image(uiImage: image)
-                    .resizable()
-                    .scaledToFit()
-                    .frame(height: 200)
-            }
+  @EnvironmentObject var postStore: PostStore
 
-            PhotosPicker("Select Workout Photo", selection: .constant(nil))
-                .padding()
+  @State private var selectedItem: PhotosPickerItem? = nil
+  @State private var selectedImage: UIImage? = nil
+  @State private var caption: String = ""
+  @State private var isPosted = false
+  @AppStorage("username") private var username: String = ""
 
-            TextField("Write a caption...", text: $caption)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-                .padding(.horizontal)
+  var body: some View {
+    VStack(spacing: 20) {
+      if let image = selectedImage {
+        Image(uiImage: image)
+          .resizable()
+          .scaledToFit()
+          .frame(height: 200)
+          .cornerRadius(10)
+      }
 
-            Button("Post") {
-                isPosted = true
-            }
-            .buttonStyle(.borderedProminent)
+      PhotosPicker(
+        selection: $selectedItem,
+        matching: .images,
+        photoLibrary: .shared()
+      ) {
+        Text("Select Workout Photo")
+          .padding()
+          .frame(maxWidth: .infinity)
+          .background(Color.blue.opacity(0.1))
+          .cornerRadius(8)
+      }
 
-            if isPosted {
-                Text("✅ Post uploaded!")
-                    .foregroundColor(.green)
-            }
+      TextField("Write a caption...", text: $caption)
+        .textFieldStyle(RoundedBorderTextFieldStyle())
+        .padding(.horizontal)
 
-            Spacer()
+      Button("Post") {
+        if let image = selectedImage {
+          let newPost = WorkoutPost(
+            image: image, caption: caption, username: username, timestamp: Date())
+          postStore.posts.insert(newPost, at: 0)
+          caption = ""
+          selectedImage = nil
+          isPosted = true
         }
-        .padding()
-        .navigationTitle("Post")
+      }
+      .buttonStyle(.borderedProminent)
+
+      if isPosted {
+        Text("✅ Post uploaded!")
+          .foregroundColor(.green)
+      }
+
+      Spacer()
     }
+    .padding()
+    .onChange(of: selectedItem) {
+      Task {
+        if let data = try? await selectedItem?.loadTransferable(type: Data.self),
+          let uiImage = UIImage(data: data)
+        {
+          selectedImage = uiImage
+        }
+      }
+    }
+    .navigationTitle("Post")
+  }
 }
