@@ -2,61 +2,110 @@ import PhotosUI
 import SwiftUI
 
 struct PostView: View {
-
   @EnvironmentObject var postStore: PostStore
+  @AppStorage("username") private var username: String = ""
 
   @State private var selectedItem: PhotosPickerItem? = nil
   @State private var selectedImage: UIImage? = nil
   @State private var caption: String = ""
   @State private var isPosted = false
-  @AppStorage("username") private var username: String = ""
+  @State private var shareToFeed = true
 
   var body: some View {
-    VStack(spacing: 20) {
-      if let image = selectedImage {
-        Image(uiImage: image)
-          .resizable()
-          .scaledToFit()
-          .frame(height: 200)
-          .cornerRadius(10)
-      }
+    ZStack {
+      Color.black.ignoresSafeArea()
 
-      PhotosPicker(
-        selection: $selectedItem,
-        matching: .images,
-        photoLibrary: .shared()
-      ) {
-        Text("Select Workout Photo")
+      VStack(spacing: 24) {
+        Text("Check in your\nworkout")
+          .font(.system(size: 28, weight: .bold, design: .rounded))
+          .multilineTextAlignment(.center)
+          .foregroundColor(.green)
+          .padding(.top, 20)
+
+        if let image = selectedImage {
+          Image(uiImage: image)
+            .resizable()
+            .scaledToFit()
+            .cornerRadius(16)
+            .frame(maxHeight: 250)
+            .padding(.horizontal)
+        } else {
+          PhotosPicker(
+            selection: $selectedItem,
+            matching: .images,
+            photoLibrary: .shared()
+          ) {
+            VStack(spacing: 8) {
+              Image(systemName: "photo.on.rectangle")
+                .font(.system(size: 36))
+              Text("Select Workout Photo")
+            }
+            .foregroundColor(.white)
+            .padding()
+            .frame(maxWidth: .infinity)
+            .background(Color(.secondarySystemBackground))
+            .cornerRadius(12)
+            .padding(.horizontal)
+          }
+        }
+
+        TextField("Crushed my push day! 💪", text: $caption)
           .padding()
-          .frame(maxWidth: .infinity)
-          .background(Color.blue.opacity(0.1))
-          .cornerRadius(8)
-      }
+          .foregroundColor(.white)
+          .background(
+            RoundedRectangle(cornerRadius: 12)
+              .stroke(Color.white.opacity(0.3), lineWidth: 1)
+          )
+          .padding(.horizontal)
 
-      TextField("Write a caption...", text: $caption)
-        .textFieldStyle(RoundedBorderTextFieldStyle())
+        Toggle("Also share to public feed", isOn: $shareToFeed)
+          .padding(.horizontal)
+          .tint(.green)
+          .foregroundColor(.white)
+
+        Button(action: {
+          if let image = selectedImage {
+            let newPost = WorkoutPost(
+              image: image,
+              caption: caption,
+              username: username,
+              timestamp: Date()
+            )
+
+            if shareToFeed {
+              postStore.posts.insert(newPost, at: 0)
+            }
+
+            selectedImage = nil
+            caption = ""
+            isPosted = true
+
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+              isPosted = false
+            }
+          }
+        }) {
+          Text("Confirm")
+            .font(.headline)
+            .frame(maxWidth: .infinity)
+            .padding()
+            .background(selectedImage != nil ? Color.green : Color.gray)
+            .foregroundColor(.black)
+            .cornerRadius(16)
+        }
+        .disabled(selectedImage == nil)
         .padding(.horizontal)
 
-      Button("Post") {
-        if let image = selectedImage {
-          let newPost = WorkoutPost(
-            image: image, caption: caption, username: username, timestamp: Date())
-          postStore.posts.insert(newPost, at: 0)
-          caption = ""
-          selectedImage = nil
-          isPosted = true
+        if isPosted {
+          Text("✅ Workout posted!")
+            .foregroundColor(.green)
+            .transition(.opacity)
         }
-      }
-      .buttonStyle(.borderedProminent)
 
-      if isPosted {
-        Text("✅ Post uploaded!")
-          .foregroundColor(.green)
+        Spacer()
       }
-
-      Spacer()
+      .padding(.bottom)
     }
-    .padding()
     .onChange(of: selectedItem) {
       Task {
         if let data = try? await selectedItem?.loadTransferable(type: Data.self),
@@ -66,6 +115,5 @@ struct PostView: View {
         }
       }
     }
-    .navigationTitle("Post")
   }
 }

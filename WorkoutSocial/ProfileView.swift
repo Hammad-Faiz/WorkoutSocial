@@ -1,25 +1,37 @@
 import SwiftUI
 
 struct ProfileView: View {
-  @AppStorage("isLoggedIn") private var isLoggedIn: Bool = true
   @AppStorage("username") private var username: String = ""
+  @AppStorage("isLoggedIn") private var isLoggedIn: Bool = false
 
   var body: some View {
-    VStack(spacing: 20) {
-      Text("Logged in as \(username)")
-        .font(.title2)
+    NavigationView {
+      VStack(spacing: 24) {
+        Text("Welcome, \(username)")
+          .font(.title2)
+          .fontWeight(.semibold)
 
-      Button("Log Out") {
-        isLoggedIn = false
-        username = ""
+        NavigationLink(destination: ScheduleSetupView()) {
+          Text("Set Workout Schedule")
+            .frame(maxWidth: .infinity)
+            .padding()
+            .background(Color.blue)
+            .foregroundColor(.white)
+            .cornerRadius(12)
+            .padding(.horizontal)
+        }
+
+        Spacer()
+
+        Button("Log Out") {
+          isLoggedIn = false
+          username = ""
+        }
+        .foregroundColor(.red)
       }
-      .foregroundColor(.red)
       .padding()
-      .buttonStyle(.bordered)
-
-      Spacer()
+      .navigationTitle("Profile")
+      .navigationBarTitleDisplayMode(.inline)
     }
-    .padding()
-    .navigationTitle("Profile")
   }
 }

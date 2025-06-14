@@ -18,7 +18,6 @@ struct LoginView: View {
         Text("WorkoutSocial")
           .font(.largeTitle)
           .bold()
-
         TextField("Enter username", text: $username)
           .textFieldStyle(RoundedBorderTextFieldStyle())
           .padding(.horizontal)
