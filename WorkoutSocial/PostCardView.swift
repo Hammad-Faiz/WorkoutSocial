@@ -1,7 +1,7 @@
 import SwiftUI
 
 struct PostCardView: View {
-  @ObservedObject var post: WorkoutPost
+  let post: WorkoutPost
 
   var body: some View {
     VStack(alignment: .leading, spacing: 10) {

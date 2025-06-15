@@ -2,35 +2,49 @@ import SwiftUI
 
 struct LoginView: View {
   @AppStorage("username") private var username: String = ""
+  @AppStorage("password") private var password: String = ""
   @AppStorage("isLoggedIn") private var isLoggedIn: Bool = false
 
-  init() {
-    // Temporary for testing: force logout every time
-    isLoggedIn = false
-    username = ""
-  }
+  @State private var inputUsername: String = ""
+  @State private var inputPassword: String = ""
 
   var body: some View {
-    if isLoggedIn {
-      MainTabView()
-    } else {
-      VStack(spacing: 20) {
-        Text("WorkoutSocial")
-          .font(.largeTitle)
-          .bold()
-        TextField("Enter username", text: $username)
-          .textFieldStyle(RoundedBorderTextFieldStyle())
-          .padding(.horizontal)
+    ZStack {
+      Color.black.ignoresSafeArea()
 
-        Button("Login") {
-          if !username.trimmingCharacters(in: .whitespaces).isEmpty {
-            isLoggedIn = true
-          }
+      VStack(spacing: 24) {
+        Text("Login")
+          .font(.system(size: 32, weight: .bold, design: .rounded))
+          .foregroundColor(.green)
+
+        TextField("Username", text: $inputUsername)
+          .padding()
+          .background(Color(.darkGray))
+          .foregroundColor(.white)
+          .cornerRadius(10)
+          .autocapitalization(.none)
+
+        SecureField("Password", text: $inputPassword)
+          .padding()
+          .background(Color(.darkGray))
+          .foregroundColor(.white)
+          .cornerRadius(10)
+
+        Button(action: {
+          username = inputUsername
+          password = inputPassword
+          isLoggedIn = true
+        }) {
+          Text("Log In")
+            .font(.headline)
+            .frame(maxWidth: .infinity)
+            .padding()
+            .background(Color.green)
+            .foregroundColor(.black)
+            .cornerRadius(12)
         }
-        .disabled(username.trimmingCharacters(in: .whitespaces).isEmpty)
-        .padding()
-        .buttonStyle(.borderedProminent)
       }
+      .padding(.horizontal, 32)
     }
   }
 }
