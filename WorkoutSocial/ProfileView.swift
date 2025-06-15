@@ -21,6 +21,16 @@ struct ProfileView: View {
             .padding(.horizontal)
         }
 
+        NavigationLink(destination: ConsistencyTrackerView()) {
+          Text("View Consistency Tracker")
+            .frame(maxWidth: .infinity)
+            .padding()
+            .background(Color.green)
+            .foregroundColor(.black)
+            .cornerRadius(12)
+        }
+        .padding(.horizontal)
+
         Spacer()
 
         Button("Log Out") {

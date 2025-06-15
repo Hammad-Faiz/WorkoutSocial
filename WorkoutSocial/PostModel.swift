@@ -23,6 +23,6 @@ class WorkoutPost: Identifiable, Equatable, ObservableObject {
 
 }
 
-class PostStore: ObservableObject {
-  @Published var posts: [WorkoutPost] = []
-}
+// class PostStore: ObservableObject {
+//   @Published var posts: [WorkoutPost] = []
+// }

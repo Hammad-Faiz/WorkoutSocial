@@ -9,9 +9,13 @@ import SwiftUI
 
 @main
 struct WorkoutSocialApp: App {
-    var body: some Scene {
-        WindowGroup {
-            LoginView()
-        }
+  @StateObject var postStore = PostStore()
+
+  var body: some Scene {
+    WindowGroup {
+      LoginView()
+        .preferredColorScheme(.dark)
+        .environmentObject(postStore)
     }
+  }
 }

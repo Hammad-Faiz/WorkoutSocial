@@ -2,7 +2,6 @@ import PhotosUI
 import SwiftUI
 
 struct PostView: View {
-  @EnvironmentObject var postStore: PostStore
   @AppStorage("username") private var username: String = ""
 
   @State private var selectedItem: PhotosPickerItem? = nil
@@ -10,6 +9,8 @@ struct PostView: View {
   @State private var caption: String = ""
   @State private var isPosted = false
   @State private var shareToFeed = true
+
+  @EnvironmentObject var postStore: PostStore
 
   var body: some View {
     ZStack {
@@ -76,6 +77,10 @@ struct PostView: View {
               postStore.posts.insert(newPost, at: 0)
             }
 
+            // ✅ Track check-in regardless of whether it's shared
+            postStore.addCheckIn()
+
+            // Clear form + show confirmation
             selectedImage = nil
             caption = ""
             isPosted = true
